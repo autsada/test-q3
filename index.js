@@ -9,38 +9,47 @@ process.argv.forEach((val, index) => {
 
 if (input) {
   // Read the content from website
-  getContent().then((res) => {
-    const html = res.toString('utf-8')
+  getContent()
+    .then((res) => {
+      const html = res.toString('utf-8')
 
-    // Parse the head of the table
-    const headString = html.match(/\<th\>(.+)\<\/th\>/)[1]
-    const heads = headString.split('</th><th>').map((str) => str.trim())
+      // Parse the head of the table
+      const headString = html.match(/\<th\>(.+)\<\/th\>/)[1]
+      const heads = headString.split('</th><th>').map((str) => str.trim())
 
-    // parse the body of the table
-    const bodyString = html
-      .match(/\<td\>(.+)\<\/td\>/)[1]
-      .replaceAll('</td><td>', ',')
-    const bodies = bodyString
-      .split('</td></tr><tr> <td>')
-      .map((str) => str.split(','))
+      // parse the body of the table
+      const bodyString = html
+        .match(/\<td\>(.+)\<\/td\>/)[1]
+        .replaceAll('</td><td>', ',')
+      const bodies = bodyString
+        .split('</td></tr><tr> <td>')
+        .map((str) => str.split(','))
 
-    // Convert each row of body to object and store in array
-    const data = []
+      // Convert each row of body to object and store in array
+      const data = []
 
-    bodies.map((bd) => {
-      const content = {}
+      bodies.map((bd) => {
+        const content = {}
 
-      bd.forEach((item, i) => {
-        content[heads[i]] = item.trim()
+        bd.forEach((item, i) => {
+          content[heads[i]] = item.trim()
+        })
+
+        data.push(content)
       })
 
-      data.push(content)
-    })
+      // Find the data that match the input
+      const foundData = data.find((item) => item['Fund Name'] === input)
 
-    // Find the data that match the input
-    const foundData = data.find((item) => item['Fund Name'] === input)
-    console.log(foundData.Nav)
-  })
+      if (foundData) {
+        console.log(foundData.Nav)
+      } else {
+        console.log('')
+      }
+    })
+    .catch((error) => {
+      console.log(error)
+    })
 }
 
 // Helper function to get website content
